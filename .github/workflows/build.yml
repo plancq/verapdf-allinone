@@ -1,0 +1,42 @@
+name: Build and Ship veraPDF Container
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Source Files
+        uses: actions/checkout@v4
+
+      - name: Initialize QEMU Multi-Arch Emulation
+        uses: docker/setup-qemu-action@v3
+
+      - name: Initialize Docker Buildx Workspaces
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate Container Gateway
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compile and Stream Package Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
