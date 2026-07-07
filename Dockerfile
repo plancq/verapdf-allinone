@@ -14,13 +14,29 @@ RUN apk update && apk add --no-cache \
     supervisor \
     ttf-dejavu
 
-# Download and place the latest standalone version of veraPDF
+# Download veraPDF installer and run a silent automated installation
 WORKDIR /opt
 RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
     rm verapdf-installer.zip && \
-    mv verapdf-installer-* verapdf-source && \
-    chmod +x /opt/verapdf-source/verapdf-gui
+    # Create an automated installation script for the IzPack installer
+    echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' > auto-install.xml && \
+    echo '<AutomatedInstallation langpack="eng">' >> auto-install.xml && \
+    echo '  <com.izforge.izpack.panels.htmlhello.HTMLHelloPanel id="welcome"/>' >> auto-install.xml && \
+    echo '  <com.izforge.izpack.panels.target.TargetPanel id="install_dir">' >> auto-install.xml && \
+    echo '    <installpath>/opt/verapdf</installpath>' >> auto-install.xml && \
+    echo '  </com.izforge.izpack.panels.target.TargetPanel>' >> auto-install.xml && \
+    echo '  <com.izforge.izpack.panels.packs.PacksPanel id="packs">' >> auto-install.xml && \
+    echo '    <pack index="0" name="veraPDF Desktop" selected="true"/>' >> auto-install.xml && \
+    echo '    <pack index="1" name="veraPDF Documentation" selected="true"/>' >> auto-install.xml && \
+    echo '  </com.izforge.izpack.panels.packs.PacksPanel>' >> auto-install.xml && \
+    echo '  <com.izforge.izpack.panels.install.InstallPanel id="install"/>' >> auto-install.xml && \
+    echo '  <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>' >> auto-install.xml && \
+    echo '</AutomatedInstallation>' >> auto-install.xml && \
+    # Execute the installer headlessly and clean up build source files
+    java -jar verapdf-greenfield-*/verapdf-izpack-installer-*.jar auto-install.xml && \
+    rm -rf verapdf-greenfield-* auto-install.xml && \
+    chmod +x /opt/verapdf/verapdf-gui
 
 # Create standard storage target mount paths
 RUN mkdir -p /data/pdfs /etc/supervisor.d
@@ -43,8 +59,8 @@ RUN echo '[program:xvfb]' > /etc/supervisor.d/verapdf.ini && \
     echo '[program:novnc]' >> /etc/supervisor.d/verapdf.ini && \
     echo 'command=/usr/bin/novnc_proxy --vnc localhost:5900 --listen 80' >> /etc/supervisor.d/verapdf.ini && \
     echo '[program:verapdf]' >> /etc/supervisor.d/verapdf.ini && \
-    echo 'command=/opt/verapdf-source/verapdf-gui' >> /etc/supervisor.d/verapdf.ini && \
-    environment=DISPLAY=":1"' >> /etc/supervisor.d/verapdf.ini
+    echo 'command=/opt/verapdf/verapdf-gui' >> /etc/supervisor.d/verapdf.ini && \
+    echo 'environment=DISPLAY=":1"' >> /etc/supervisor.d/verapdf.ini
 
 EXPOSE 80
 
