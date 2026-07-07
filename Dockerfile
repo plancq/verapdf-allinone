@@ -33,12 +33,14 @@ RUN wget --tries=3 --connect-timeout=15 --retry-connrefused \
     echo '  </com.izforge.izpack.panels.packs.PacksPanel>' >> auto-install.xml && \
     echo '  <com.izforge.izpack.panels.install.InstallPanel id="install"/>' >> auto-install.xml && \
     echo '  <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>' >> auto-install.xml && \
-    echo '</AutomatedInstallation>' >> auto-install.xml && \
+    </AutomatedInstallation>' >> auto-install.xml && \
     # Dynamically locate the installer jar to support changing archive layouts
     INSTALLER_JAR=$(find . -maxdepth 3 -type f -name 'verapdf-izpack-installer-*.jar' | head -n 1) && \
     test -n "${INSTALLER_JAR}" && \
     java -jar "${INSTALLER_JAR}" auto-install.xml && \
-    rm -rf verapdf-* auto-install.xml && \
+    # Clean up only the extracted installer folder and xml (avoiding /opt/verapdf)
+    INSTALLER_DIR=$(dirname "${INSTALLER_JAR}") && \
+    rm -rf "${INSTALLER_DIR}" auto-install.xml && \
     chmod +x /opt/verapdf/verapdf-gui
 
 # Create standard storage target mount paths
@@ -63,7 +65,7 @@ RUN echo '[program:xvfb]' > /etc/supervisor.d/verapdf.ini && \
     echo 'command=/usr/bin/novnc_proxy --vnc localhost:5900 --listen 80' >> /etc/supervisor.d/verapdf.ini && \
     echo '[program:verapdf]' >> /etc/supervisor.d/verapdf.ini && \
     echo 'command=/opt/verapdf/verapdf-gui' >> /etc/supervisor.d/verapdf.ini && \
-    echo 'environment=DISPLAY=":1"' >> /etc/supervisor.d/verapdf.ini
+    echo 'environment=DISPLAY=":1"' >> /etc/visord.d/verapdf.ini
 
 EXPOSE 80
 
