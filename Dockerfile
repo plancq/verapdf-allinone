@@ -20,7 +20,9 @@ RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
     rm verapdf-installer.zip && \
     mv verapdf-* verapdf-source && \
-    chmod +x /opt/verapdf-source/verapdf-gui
+    VERAPDF_GUI="$(find /opt/verapdf-source -type f -name verapdf-gui | head -n 1)" && \
+    chmod +x "$VERAPDF_GUI" && \
+    ln -sf "$VERAPDF_GUI" /opt/verapdf-source/verapdf-gui
 
 # Create standard storage mount paths
 RUN mkdir -p /data/pdfs
