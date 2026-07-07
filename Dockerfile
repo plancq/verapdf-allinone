@@ -20,7 +20,14 @@ RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
     rm verapdf-installer.zip && \
     mv verapdf-* verapdf-source && \
-    chmod +x /opt/verapdf-source/verapdf-gui
+    if [ -f /opt/verapdf-source/verapdf-gui ]; then \
+        chmod +x /opt/verapdf-source/verapdf-gui; \
+    elif [ -f /opt/verapdf-source/verapdf-install ]; then \
+        chmod +x /opt/verapdf-source/verapdf-install && \
+        ln -s /opt/verapdf-source/verapdf-install /opt/verapdf-source/verapdf-gui; \
+    else \
+        echo "Unable to locate a veraPDF launcher in extracted artifacts." && exit 1; \
+    fi
 
 # Create standard storage mount paths
 RUN mkdir -p /data/pdfs
