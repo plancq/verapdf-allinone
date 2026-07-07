@@ -1,7 +1,7 @@
 FROM alpine:3.20
 
 # Install Java, download tools, unzip, and shell requirements
-RUN apk update && apk add --no-cache \
+RUN apk add --no-cache \
     openjdk17-jre \
     wget \
     unzip \
@@ -32,12 +32,13 @@ RUN echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?> \
 </AutomatedInstallation>' > auto-install.xml
 
 # 4. Execute the headless installation using wildcards to handle version variations
+# 5. Resolve the installed CLI path dynamically so the build doesn't depend on a fixed binary location
 RUN java -jar /opt/verapdf-greenfield-*/verapdf-izpack-installer-*.jar auto-install.xml && \
     rm -rf /opt/verapdf-greenfield-* auto-install.xml && \
-    chmod +x /opt/verapdf/verapdf
-
-# 5. Global symlink so 'verapdf' works directly from any command line context
-RUN ln -s /opt/verapdf/verapdf /usr/local/bin/verapdf
+    VERAPDF_BIN="$(find /opt/verapdf -maxdepth 3 -type f -name verapdf | head -n 1)" && \
+    test -n "$VERAPDF_BIN" && \
+    chmod +x "$VERAPDF_BIN" && \
+    ln -s "$VERAPDF_BIN" /usr/local/bin/verapdf
 
 ENTRYPOINT ["verapdf"]
 CMD ["--help"]
