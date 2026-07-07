@@ -16,7 +16,8 @@ RUN apk update && apk add --no-cache \
 
 # Download veraPDF installer and run a silent automated installation
 WORKDIR /opt
-RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
+RUN wget --tries=3 --connect-timeout=15 --retry-connrefused \
+    https://software.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
     rm verapdf-installer.zip && \
     # Create an automated installation script for the IzPack installer
@@ -33,9 +34,11 @@ RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
     echo '  <com.izforge.izpack.panels.install.InstallPanel id="install"/>' >> auto-install.xml && \
     echo '  <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>' >> auto-install.xml && \
     echo '</AutomatedInstallation>' >> auto-install.xml && \
+    # Dynamically locate the extracted folder name to prevent wildcard failure
+    EXTRACTED_DIR=$(ls -d verapdf-*/ verapdf-greenfield-*/ 2>/dev/null | head -n 1) && \
     # Execute the installer headlessly and clean up build source files
-    java -jar verapdf-greenfield-*/verapdf-izpack-installer-*.jar auto-install.xml && \
-    rm -rf verapdf-greenfield-* auto-install.xml && \
+    java -jar ${EXTRACTED_DIR}verapdf-izpack-installer-*.jar auto-install.xml && \
+    rm -rf ${EXTRACTED_DIR} auto-install.xml && \
     chmod +x /opt/verapdf/verapdf-gui
 
 # Create standard storage target mount paths
