@@ -44,7 +44,7 @@ RUN echo '[program:xvfb]' > /etc/supervisor.d/verapdf.ini && \
     echo 'command=/usr/bin/novnc_proxy --vnc localhost:5900 --listen 80' >> /etc/supervisor.d/verapdf.ini && \
     echo '[program:verapdf]' >> /etc/supervisor.d/verapdf.ini && \
     echo 'command=/opt/verapdf-source/verapdf-gui' >> /etc/supervisor.d/verapdf.ini && \
-    echo 'environment=DISPLAY=":1"' >> /etc/supervisor.d/verapdf.ini
+    environment=DISPLAY=":1"' >> /etc/supervisor.d/verapdf.ini
 
 EXPOSE 80
 
