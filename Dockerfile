@@ -19,7 +19,7 @@ WORKDIR /opt
 RUN wget http://downloads.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
     rm verapdf-installer.zip && \
-    mv verapdf-installer-* verapdf-source && \
+    mv verapdf-* verapdf-source && \
     chmod +x /opt/verapdf-source/verapdf-gui
 
 # Create standard storage mount paths
