@@ -10,7 +10,7 @@ RUN apk update && apk add --no-cache \
 
 WORKDIR /opt
 
-# 1. Download directly via secure HTTPS link to avoid redirect loops
+# 1. Download directly via the secure HTTPS link to avoid multiple redirect loops
 # 2. Extract into the actual directory structure provided by the archive
 RUN wget https://software.verapdf.org/rel/verapdf-installer.zip && \
     unzip verapdf-installer.zip && \
@@ -31,9 +31,9 @@ RUN echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?> \
     <com.izforge.izpack.panels.finish.FinishPanel id="finish"/> \
 </AutomatedInstallation>' > auto-install.xml
 
-# 4. Execute the headless installation using the generated profile
-RUN java -jar /opt/verapdf-greenfield-1.30.2/verapdf-izpack-installer-1.30.2.jar auto-install.xml && \
-    rm -rf /opt/verapdf-greenfield-1.30.2 auto-install.xml && \
+# 4. Execute the headless installation using wildcards to handle version variations
+RUN java -jar /opt/verapdf-greenfield-*/verapdf-izpack-installer-*.jar auto-install.xml && \
+    rm -rf /opt/verapdf-greenfield-* auto-install.xml && \
     chmod +x /opt/verapdf/verapdf
 
 # 5. Global symlink so 'verapdf' works directly from any command line context
