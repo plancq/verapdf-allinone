@@ -34,9 +34,8 @@ RUN wget --tries=3 --connect-timeout=15 --retry-connrefused \
     echo '  <com.izforge.izpack.panels.install.InstallPanel id="install"/>' >> auto-install.xml && \
     echo '  <com.izforge.izpack.panels.finish.FinishPanel id="finish"/>' >> auto-install.xml && \
     echo '</AutomatedInstallation>' >> auto-install.xml && \
-    # Dynamically locate the extracted folder name to prevent wildcard failure
+    # Dynamically locate the extracted folder prefix to execute the jar safely
     EXTRACTED_DIR=$(ls -d verapdf-*/ verapdf-greenfield-*/ 2>/dev/null | head -n 1) && \
-    # Execute the installer headlessly and clean up build source files
     java -jar ${EXTRACTED_DIR}verapdf-izpack-installer-*.jar auto-install.xml && \
     rm -rf ${EXTRACTED_DIR} auto-install.xml && \
     chmod +x /opt/verapdf/verapdf-gui
